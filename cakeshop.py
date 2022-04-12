@@ -3,7 +3,7 @@ from typing import Iterator
 
 SMALL_LEAD_TIME = timedelta(days=1)  
 BIG_LEAD_TIME = timedelta(days=2)
-MARCO_WORK_DAYS = [0, 1, 2, 3, 4, 5]
+MARCO_WORK_DAYS = [0, 1, 2, 3, 4]
 
 def _days_from(d: date) -> Iterator[date]:
     yield d

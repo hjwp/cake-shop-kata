@@ -30,6 +30,8 @@ MONDAY = 0
 TUESDAY = 1
 WEDNESDAY = 2
 THURSDAY = 3
+FRIDAY = 4
+SATURDAY = 5
 SUNDAY = 6
 
 from cakeshop import calculate_delivery_date
@@ -52,7 +54,9 @@ def test_small_cake_simple_days():
     two_days_later = a_tuesday + timedelta(days=2)
     assert two_days_later.weekday() == THURSDAY  # sanity-check
     assert (
-        calculate_delivery_date(cake_size="small", order_date=a_tuesday, time="afternoon")
+        calculate_delivery_date(
+            cake_size="small", order_date=a_tuesday, time="afternoon"
+        )
         == two_days_later
     )
 
@@ -80,6 +84,7 @@ def test_orders_in_morning_start_same_day():
         == next_day
     )
 
+
 def test_order_received_outside_marco_working_days():
     """
     * Marco works from Monday-Friday,
@@ -92,4 +97,21 @@ def test_order_received_outside_marco_working_days():
         == tuesday
     )
 
+    saturday = a_day(SATURDAY)
+    assert (
+        calculate_delivery_date(cake_size="small", order_date=saturday, time="morning")
+        == tuesday
+    )
 
+
+# def test_lead_time_spans_marco_nonworking_days():
+#     """
+#     * Marco works from Monday-Friday,
+#     """
+#     friday = a_day(FRIDAY)
+#     tuesday = sunday + timedelta(days=2)
+#     assert tuesday.weekday() == TUESDAY  # sanity-check
+#     assert (
+#         calculate_delivery_date(cake_size="small", order_date=sunday, time="morning")
+#         == tuesday
+#     )
