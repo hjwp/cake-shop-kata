@@ -12,9 +12,6 @@ For example, if a cake is ordered on the 1st of the month, and has a lead time o
 
 * Marco works from Monday-Friday, and Sandro works from Tuesday-Saturday.
 * Cakes are always delivered on the day they're finished. Nobody likes stale cake.
-* Small cakes have a lead time of 2 days.
-* Big cakes have a lead time of 3 days.
-* If Marco receives a cake order in the morning (ie, before 12pm) he starts on the same day.
 * Custom frosting adds 2 days extra lead time. You can only frost a baked cake.
 * The shop can gift-wrap cakes in fancy boxes. Fancy boxes have a lead time of 3 days.
   Boxes can arrive while the friends are working on the cake,
@@ -29,6 +26,8 @@ from datetime import date, timedelta
 
 MONDAY = 0
 TUESDAY = 1
+WEDNESDAY = 2
+THURSDAY = 3
 
 from cakeshop import calculate_delivery_date
 
@@ -43,9 +42,38 @@ def a_day(day_of_week: int) -> date:
 
 
 def test_small_cake_simple_days():
+    """
+    * Small cakes have a lead time of 2 days.
+    """
     a_tuesday = a_day(TUESDAY)
     two_days_later = a_tuesday + timedelta(days=2)
+    assert two_days_later.weekday() == THURSDAY  # sanity-check
+    assert (
+        calculate_delivery_date(cake_size="small", order_date=a_tuesday, time="afternoon")
+        == two_days_later
+    )
+
+
+def test_big_cake_simple_days():
+    """
+    * Big cakes have a lead time of 3 days.
+    """
+    a_tuesday = a_day(TUESDAY)
+    three_days_later = a_tuesday + timedelta(days=3)
+    assert (
+        calculate_delivery_date(cake_size="big", order_date=a_tuesday, time="afternoon")
+        == three_days_later
+    )
+
+
+def test_orders_in_morning_start_same_day():
+    """
+    * If Marco receives a cake order in the morning (ie, before 12pm) he starts on the same day.
+    """
+    a_tuesday = a_day(TUESDAY)
+    next_day = a_tuesday + timedelta(days=1)
+    assert next_day.weekday() == WEDNESDAY
     assert (
         calculate_delivery_date(cake_size="small", order_date=a_tuesday, time="morning")
-        == two_days_later
+        == next_day
     )
