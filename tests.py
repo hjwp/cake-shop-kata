@@ -12,7 +12,6 @@ For example, if a cake is ordered on the 1st of the month, and has a lead time o
 
 * Cakes are always delivered on the day they're finished. Nobody likes stale cake.
 
-* Marco works from Monday-Friday,
 * and Sandro works from Tuesday-Saturday.
 * Custom frosting adds 2 days extra lead time. You can only frost a baked cake.
 * The shop can gift-wrap cakes in fancy boxes. Fancy boxes have a lead time of 3 days.
@@ -55,7 +54,10 @@ def test_small_cake_simple_days():
     assert two_days_later.weekday() == THURSDAY  # sanity-check
     assert (
         calculate_delivery_date(
-            cake_size="small", order_date=a_tuesday, time="afternoon"
+            cake_size="small",
+            custom_frosting=False,
+            order_date=a_tuesday,
+            time="afternoon",
         )
         == two_days_later
     )
@@ -68,7 +70,12 @@ def test_big_cake_simple_days():
     a_tuesday = a_day(TUESDAY)
     three_days_later = a_tuesday + timedelta(days=3)
     assert (
-        calculate_delivery_date(cake_size="big", order_date=a_tuesday, time="afternoon")
+        calculate_delivery_date(
+            cake_size="big",
+            custom_frosting=False,
+            order_date=a_tuesday,
+            time="afternoon",
+        )
         == three_days_later
     )
 
@@ -80,7 +87,12 @@ def test_orders_in_morning_start_same_day():
     a_tuesday = a_day(TUESDAY)
     next_day = a_tuesday + timedelta(days=1)
     assert (
-        calculate_delivery_date(cake_size="small", order_date=a_tuesday, time="morning")
+        calculate_delivery_date(
+            cake_size="small",
+            custom_frosting=False,
+            order_date=a_tuesday,
+            time="morning",
+        )
         == next_day
     )
 
@@ -93,13 +105,23 @@ def test_order_received_outside_marco_working_days():
     tuesday = sunday + timedelta(days=2)
     assert tuesday.weekday() == TUESDAY  # sanity-check
     assert (
-        calculate_delivery_date(cake_size="small", order_date=sunday, time="morning")
+        calculate_delivery_date(
+            cake_size="small",
+            custom_frosting=False,
+            order_date=sunday,
+            time="morning",
+        )
         == tuesday
     )
 
     saturday = a_day(SATURDAY)
     assert (
-        calculate_delivery_date(cake_size="small", order_date=saturday, time="morning")
+        calculate_delivery_date(
+            cake_size="small",
+            custom_frosting=False,
+            order_date=saturday,
+            time="morning",
+        )
         == tuesday
     )
 
@@ -112,11 +134,98 @@ def test_lead_time_spans_marco_nonworking_days():
     monday = friday + timedelta(days=3)
     assert monday.weekday() == MONDAY  # sanity-check
     assert (
-        calculate_delivery_date(cake_size="small", order_date=friday, time="morning")
+        calculate_delivery_date(
+            cake_size="small",
+            custom_frosting=False,
+            order_date=friday,
+            time="morning",
+        )
         == monday
     )
     tuesday = friday + timedelta(days=4)
     assert (
-        calculate_delivery_date(cake_size="small", order_date=friday, time="afternoon")
+        calculate_delivery_date(
+            cake_size="small",
+            custom_frosting=False,
+            order_date=friday,
+            time="afternoon",
+        )
         == tuesday
+    )
+
+
+def test_sandro_frosting_in_working_days():
+    """
+    * Custom frosting adds 2 days extra lead time. You can only frost a baked cake.
+    """
+    a_monday = a_day(MONDAY)
+    four_days_later = a_monday + timedelta(days=4)
+    assert four_days_later.weekday() == FRIDAY  # sanity-check
+    assert (
+        calculate_delivery_date(
+            cake_size="small",
+            custom_frosting=True,
+            order_date=a_monday,
+            time="afternoon",
+        )
+        == four_days_later
+    )
+
+
+def test_sandro_frosting_on_saturday():
+    """
+    * Custom frosting adds 2 days extra lead time. You can only frost a baked cake.
+    * and Sandro works from Tuesday-Saturday.
+    """
+    a_tuesday = a_day(TUESDAY)
+    four_days_later = a_tuesday + timedelta(days=4)
+    assert four_days_later.weekday() == SATURDAY  # sanity-check
+    assert (
+        calculate_delivery_date(
+            cake_size="small",
+            custom_frosting=True,
+            order_date=a_tuesday,
+            time="afternoon",
+        )
+        == four_days_later
+    )
+
+
+def test_sandro_frosting_over_nonwork_days():
+    """
+    * Custom frosting adds 2 days extra lead time. You can only frost a baked cake.
+    * and Sandro works from Tuesday-Saturday.
+    """
+    a_wednesday = a_day(WEDNESDAY)
+    following_tuesday = a_wednesday + timedelta(days=6)
+    assert following_tuesday.weekday() == TUESDAY  # sanity-check
+    assert (
+        calculate_delivery_date(
+            cake_size="small",
+            custom_frosting=True,
+            order_date=a_wednesday,
+            time="afternoon",
+        )
+        == following_tuesday
+    )
+
+def test_sandro_frosting_handover_on_sandro_nonwork_day():
+    """
+    * Custom frosting adds 2 days extra lead time. You can only frost a baked cake.
+    * Marco works from Monday-Friday,
+    * and Sandro works from Tuesday-Saturday.
+    -> if marco finishes on a monday, sandro still only starts on tuesday
+    (just double-checking but this should "just work")
+    """
+    a_friday = a_day(FRIDAY)
+    following_wednesday = a_friday + timedelta(days=5)
+    assert following_wednesday.weekday() == WEDNESDAY  # sanity-check
+    assert (
+        calculate_delivery_date(
+            cake_size="small",
+            custom_frosting=True,
+            order_date=a_friday,
+            time="morning",
+        )
+        == following_wednesday
     )
