@@ -104,14 +104,19 @@ def test_order_received_outside_marco_working_days():
     )
 
 
-# def test_lead_time_spans_marco_nonworking_days():
-#     """
-#     * Marco works from Monday-Friday,
-#     """
-#     friday = a_day(FRIDAY)
-#     tuesday = sunday + timedelta(days=2)
-#     assert tuesday.weekday() == TUESDAY  # sanity-check
-#     assert (
-#         calculate_delivery_date(cake_size="small", order_date=sunday, time="morning")
-#         == tuesday
-#     )
+def test_lead_time_spans_marco_nonworking_days():
+    """
+    * Marco works from Monday-Friday,
+    """
+    friday = a_day(FRIDAY)
+    monday = friday + timedelta(days=3)
+    assert monday.weekday() == MONDAY  # sanity-check
+    assert (
+        calculate_delivery_date(cake_size="small", order_date=friday, time="morning")
+        == monday
+    )
+    tuesday = friday + timedelta(days=4)
+    assert (
+        calculate_delivery_date(cake_size="small", order_date=friday, time="afternoon")
+        == tuesday
+    )

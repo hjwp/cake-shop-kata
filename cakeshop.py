@@ -9,9 +9,24 @@ def _days_from(d: date) -> Iterator[date]:
     yield d
     yield from _days_from(d + timedelta(days=1))
 
+def _marco_days_from(d: date) -> Iterator[date]:
+    if d.weekday() in MARCO_WORK_DAYS:
+        yield d
+    yield from _marco_days_from(d + timedelta(days=1))
+
+
+def _marco_lead_time(start_date: date, cake_size: str) -> date:
+    marco_days = _marco_days_from(start_date)
+    if cake_size == "small":
+        next(marco_days)
+        return next(marco_days)
+    if cake_size == "big":
+        next(marco_days)
+        next(marco_days)
+        return next(marco_days)
 
 def _marco_start_date(order_date: date, time: str) -> date:
-    next_workday = next(d for d in _days_from(order_date) if d.weekday() in MARCO_WORK_DAYS)
+    next_workday = next(_marco_days_from(order_date))
     if next_workday != order_date:
         return next_workday
     if time == "morning":
@@ -21,8 +36,4 @@ def _marco_start_date(order_date: date, time: str) -> date:
 
 def calculate_delivery_date(cake_size: str, order_date: date, time: str) -> date:
     start_date = _marco_start_date(order_date, time)
-
-    if cake_size == "small":
-        return start_date + SMALL_LEAD_TIME
-    else:
-        return start_date + BIG_LEAD_TIME
+    return _marco_lead_time(start_date, cake_size)
