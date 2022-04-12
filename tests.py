@@ -10,8 +10,10 @@ The "lead time" is the number of days that it takes to make a cake.
 The delivery date is the date the cake was ordered, plus the lead time.
 For example, if a cake is ordered on the 1st of the month, and has a lead time of 2 days, the delivery date is the 3rd of the month.
 
-* Marco works from Monday-Friday, and Sandro works from Tuesday-Saturday.
 * Cakes are always delivered on the day they're finished. Nobody likes stale cake.
+
+* Marco works from Monday-Friday,
+* and Sandro works from Tuesday-Saturday.
 * Custom frosting adds 2 days extra lead time. You can only frost a baked cake.
 * The shop can gift-wrap cakes in fancy boxes. Fancy boxes have a lead time of 3 days.
   Boxes can arrive while the friends are working on the cake,
@@ -28,6 +30,7 @@ MONDAY = 0
 TUESDAY = 1
 WEDNESDAY = 2
 THURSDAY = 3
+SUNDAY = 6
 
 from cakeshop import calculate_delivery_date
 
@@ -72,8 +75,21 @@ def test_orders_in_morning_start_same_day():
     """
     a_tuesday = a_day(TUESDAY)
     next_day = a_tuesday + timedelta(days=1)
-    assert next_day.weekday() == WEDNESDAY
     assert (
         calculate_delivery_date(cake_size="small", order_date=a_tuesday, time="morning")
         == next_day
     )
+
+def test_order_received_outside_marco_working_days():
+    """
+    * Marco works from Monday-Friday,
+    """
+    sunday = a_day(SUNDAY)
+    tuesday = sunday + timedelta(days=2)
+    assert tuesday.weekday() == TUESDAY  # sanity-check
+    assert (
+        calculate_delivery_date(cake_size="small", order_date=sunday, time="morning")
+        == tuesday
+    )
+
+
