@@ -1,0 +1,51 @@
+"""
+Connascent Cakes is an artisan baker that sells custom-made cakes for delivery.
+Two friends, Sandro and Marco own the shop.
+Marco does all the baking, while Sandro does decorations.
+
+Sandro and Marco want to start selling cakes online
+and need you to write code that can calculate the delivery date for their cakes.
+
+The "lead time" is the number of days that it takes to make a cake.
+The delivery date is the date the cake was ordered, plus the lead time.
+For example, if a cake is ordered on the 1st of the month, and has a lead time of 2 days, the delivery date is the 3rd of the month.
+
+* Marco works from Monday-Friday, and Sandro works from Tuesday-Saturday.
+* Cakes are always delivered on the day they're finished. Nobody likes stale cake.
+* Small cakes have a lead time of 2 days.
+* Big cakes have a lead time of 3 days.
+* If Marco receives a cake order in the morning (ie, before 12pm) he starts on the same day.
+* Custom frosting adds 2 days extra lead time. You can only frost a baked cake.
+* The shop can gift-wrap cakes in fancy boxes. Fancy boxes have a lead time of 3 days.
+  Boxes can arrive while the friends are working on the cake,
+* The shop can decorate cakes with nuts.
+  Unfortunately, Sandro is allergic to nuts, so Marco does this job.
+  Decorating a cake with nuts takes 1 extra day, and has to happen after any frosting has finished.
+* The shop closes for Christmas from the 23rd of December and is open again on the 2nd of January.
+  Cakes that would be complete in that period will be unable to start production until re-opening.
+  Fancy boxes will continue to arrive throughout the festive period.
+"""
+from datetime import date, timedelta
+
+MONDAY = 0
+TUESDAY = 1
+
+from cakeshop import calculate_delivery_date
+
+
+def a_day(day_of_week: int) -> date:
+    month = 2
+    return next(
+        d
+        for day in range(1, 9)
+        if (d := date(2019, month, day)).weekday() == day_of_week
+    )
+
+
+def test_small_cake_simple_days():
+    a_tuesday = a_day(TUESDAY)
+    two_days_later = a_tuesday + timedelta(days=2)
+    assert (
+        calculate_delivery_date(cake_size="small", order_date=a_tuesday, time="morning")
+        == two_days_later
+    )
