@@ -14,6 +14,7 @@ For example, if a cake is ordered on the 1st of the month, and has a lead time o
 
 * The shop can gift-wrap cakes in fancy boxes. Fancy boxes have a lead time of 3 days.
   Boxes can arrive while the friends are working on the cake,
+
 * The shop closes for Christmas from the 23rd of December and is open again on the 2nd of January.
   Cakes that would be complete in that period will be unable to start production until re-opening.
   Fancy boxes will continue to arrive throughout the festive period.
@@ -298,4 +299,62 @@ def test_marco_does_nuts_sandro_handover_on_marco_nonwork_day():
             nuts=True,
         )
         == next_monday
+    )
+
+
+def test_fancy_box_noop():
+    """
+    * The shop can gift-wrap cakes in fancy boxes. Fancy boxes have a lead time of 3 days.
+    Boxes can arrive while the friends are working on the cake,
+    -> if the cake will take 4 days anyway, the box will have no effect
+    """
+    a_monday = a_day(MONDAY)
+    four_days_later = a_monday + timedelta(days=4)
+    assert four_days_later.weekday() == FRIDAY  # sanity-check
+    assert (
+        calculate_delivery_date(
+            custom_frosting=True,
+            order_date=a_monday,
+            fancy_box=True,
+        )
+        == four_days_later
+    )
+
+
+def test_fancy_box_adds_to_marco_time():
+    """
+    order monday morning
+    cake would be ready tuesday
+    but box takes 3 days, so it's thursday
+    """
+    a_monday = a_day(MONDAY)
+    the_thursday = a_monday + timedelta(days=3)
+    assert the_thursday.weekday() == THURSDAY  # sanity-check
+    assert (
+        calculate_delivery_date(
+            order_date=a_monday,
+            time="morning",
+            fancy_box=True,
+        )
+        == the_thursday
+    )
+
+
+def test_fancy_box_adds_to_sandro_time():
+    """
+    order monday morning
+    baking would be done tuesday, cake would be ready wednesday
+    but box takes 3 days, so it's thursday
+    """
+    a_monday = a_day(MONDAY)
+    the_thursday = a_monday + timedelta(days=3)
+    assert the_thursday.weekday() == THURSDAY  # sanity-check
+    assert (
+        calculate_delivery_date(
+            order_date=a_monday,
+            time="morning",
+            custom_frosting=True,
+            fancy_box=True,
+        )
+        == the_thursday
     )

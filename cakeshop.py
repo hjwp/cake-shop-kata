@@ -66,12 +66,17 @@ def _marco_nuts_lead_time(start_date: date) -> date:
     return nuts_day
 
 
+def _fancy_box_lead_time(start_date: date) -> date:
+    return start_date + timedelta(days=3)
+
+
 def calculate_delivery_date(
     order_date: date,
     time: str = "afternoon",
     cake_size: str = "small",
     custom_frosting: bool = False,
     nuts: bool = False,
+    fancy_box: bool = False,
 ) -> date:
 
     baking_done = _marco_baking_lead_time(order_date, time, cake_size)
@@ -85,5 +90,10 @@ def calculate_delivery_date(
         nuts_done = _marco_nuts_lead_time(frosting_done)
     else:
         nuts_done = frosting_done
+
+    if fancy_box:
+        fancy_box_ready = _fancy_box_lead_time(order_date)
+        if fancy_box_ready > nuts_done:
+            return fancy_box_ready
 
     return nuts_done
