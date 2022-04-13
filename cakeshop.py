@@ -24,25 +24,25 @@ def _sandro_days_from(d: date) -> Iterator[date]:
     yield from _sandro_days_from(d + timedelta(days=1))
 
 
-def _marco_lead_time(start_date: date, cake_size: str) -> date:
-    marco_days = _marco_days_from(start_date)
+def _marco_baking_lead_time(order_date: date, time: str, cake_size: str) -> date:
+    marco_days = _marco_days_from(order_date)
+    day_1 = _marco_start_date(order_date, marco_days, time)
+    day_2 = next(marco_days)
     if cake_size == "small":
-        next(marco_days)
-        return next(marco_days)
+        return day_2
     if cake_size == "big":
-        next(marco_days)
-        next(marco_days)
-        return next(marco_days)
+        day_3 = next(marco_days)
+        return day_3
 
 
-def _marco_start_date(order_date: date, time: str) -> date:
-    next_workday = next(_marco_days_from(order_date))
-    if next_workday != order_date:
-        return next_workday
-    if time == "morning":
+def _marco_start_date(order_date: date, marco_days: Iterator[date], time: str) -> date:
+    next_workday = next(marco_days)
+    if next_workday == order_date and time == "morning":
         return order_date
+    if next_workday == order_date and time == "afternoon":
+        return next(marco_days)
     else:
-        return order_date + timedelta(days=1)
+        return next_workday
 
 
 def _sandro_frosting_lead_time(start_date: date) -> date:
@@ -59,7 +59,7 @@ def _sandro_frosting_lead_time(start_date: date) -> date:
 def _marco_nuts_lead_time(start_date: date) -> date:
     marco_days = _marco_days_from(start_date)
     next_workday = next(marco_days)
-    if True: # next_workday == start_date:  # TODO
+    if next_workday == start_date:
         nuts_day = next(marco_days)
     else:
         nuts_day = next_workday
@@ -74,8 +74,7 @@ def calculate_delivery_date(
     nuts: bool = False,
 ) -> date:
 
-    start_date = _marco_start_date(order_date, time)
-    baking_done = _marco_lead_time(start_date, cake_size)
+    baking_done = _marco_baking_lead_time(order_date, time, cake_size)
 
     if custom_frosting:
         frosting_done = _sandro_frosting_lead_time(baking_done)

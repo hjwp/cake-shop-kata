@@ -85,6 +85,22 @@ def test_orders_in_morning_start_same_day():
     )
 
 
+def test_orders_in_afternoon_on_fri_start_monday():
+    """
+    (possible edge case)
+    """
+    a_friday = a_day(FRIDAY)
+    next_tuesday = a_friday + timedelta(days=4)
+    assert next_tuesday.weekday() == TUESDAY  # sanity-check
+    assert (
+        calculate_delivery_date(
+            order_date=a_friday,
+            time="afternoon",
+        )
+        == next_tuesday
+    )
+
+
 def test_order_received_outside_marco_working_days():
     """
     * Marco works from Monday-Friday,
@@ -246,7 +262,7 @@ def test_nuts_happen_after_frosting():
     Decorating a cake with nuts takes 1 extra day,
     and has to happen after any frosting has finished.
     """
-    a_monday = a_day(MONDAY)   #morning
+    a_monday = a_day(MONDAY)  # morning
     # marco will do cake by tuesday
     # sandro will do frosting weds + thu
     # marco will add nuts on friday
@@ -268,19 +284,18 @@ def test_marco_does_nuts_sandro_handover_on_marco_nonwork_day():
     also confirms marco is the one doing nuts
     and that we calculate his working days right
     """
-    a_monday = a_day(MONDAY)   # afternoon
-    # marco will do cake by weds
-    # sandro will do frosting thu + fri
+    a_tuesday = a_day(TUESDAY)  # afternoon
+    # marco will do cake by thu
+    # sandro will do frosting fri + sat
     # marco will add nuts on monday
-    next_monday = a_monday + timedelta(days=7)
+    next_monday = a_tuesday + timedelta(days=6)
     assert next_monday.weekday() == MONDAY  # sanity-check
     assert (
         calculate_delivery_date(
-            order_date=a_monday,
+            order_date=a_tuesday,
             time="afternoon",
             custom_frosting=True,
             nuts=True,
         )
         == next_monday
     )
-
