@@ -12,9 +12,6 @@ For example, if a cake is ordered on the 1st of the month, and has a lead time o
 
 * Cakes are always delivered on the day they're finished. Nobody likes stale cake.
 
-* The shop can gift-wrap cakes in fancy boxes. Fancy boxes have a lead time of 3 days.
-  Boxes can arrive while the friends are working on the cake,
-
 * The shop closes for Christmas from the 23rd of December and is open again on the 2nd of January.
   Cakes that would be complete in that period will be unable to start production until re-opening.
   Fancy boxes will continue to arrive throughout the festive period.
@@ -357,4 +354,44 @@ def test_fancy_box_adds_to_sandro_time():
             fancy_box=True,
         )
         == the_thursday
+    )
+
+
+def test_christmas_marco():
+    """
+    * The shop closes for Christmas from the 23rd of December and is open again on the 2nd of January.
+    Cakes that would be complete in that period will be unable to start production until re-opening.
+    Fancy boxes will continue to arrive throughout the festive period.
+    """
+    dec_22 = date(2022, 12, 22)
+    assert dec_22.weekday() not in (SATURDAY, SUNDAY)  # sanity-check
+    jan_2 = date(2023, 1, 2)
+    assert jan_2.weekday() not in (SATURDAY, SUNDAY)  # sanity check
+    assert (
+        calculate_delivery_date(
+            order_date=dec_22,
+            time="morning",
+        )
+        == jan_2
+    )
+
+
+def test_christmas_sandro():
+    """
+    marco finishes just before xmas
+    """
+    dec_22 = date(2022, 12, 22)
+    assert dec_22.weekday() not in (SATURDAY, SUNDAY)  # sanity-check
+    jan_2 = date(2023, 1, 2)
+    assert jan_2.weekday() not in (SATURDAY, SUNDAY)  # sanity check
+
+    dec_20 = dec_22 - timedelta(days=2)
+    jan_4 = jan_2 + timedelta(days=2)
+    assert (
+        calculate_delivery_date(
+            order_date=dec_20,
+            time="afternoon",
+            custom_frosting=True,
+        )
+        == jan_4
     )

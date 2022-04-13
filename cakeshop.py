@@ -7,19 +7,22 @@ MARCO_WORK_DAYS = [0, 1, 2, 3, 4]
 SANDRO_WORK_DAYS = [1, 2, 3, 4, 5]
 
 
-def _days_from(d: date) -> Iterator[date]:
-    yield d
-    yield from _days_from(d + timedelta(days=1))
+def _is_xmas(d: date) -> bool:
+    if d.month == 12 and d.day > 22:
+        return True
+    if d.month == 1 and d.day == 1:
+        return True
+    return False
 
 
 def _marco_days_from(d: date) -> Iterator[date]:
-    if d.weekday() in MARCO_WORK_DAYS:
+    if d.weekday() in MARCO_WORK_DAYS and not _is_xmas(d):
         yield d
     yield from _marco_days_from(d + timedelta(days=1))
 
 
 def _sandro_days_from(d: date) -> Iterator[date]:
-    if d.weekday() in SANDRO_WORK_DAYS:
+    if d.weekday() in SANDRO_WORK_DAYS and not _is_xmas(d):
         yield d
     yield from _sandro_days_from(d + timedelta(days=1))
 
