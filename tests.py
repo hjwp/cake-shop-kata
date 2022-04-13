@@ -12,13 +12,8 @@ For example, if a cake is ordered on the 1st of the month, and has a lead time o
 
 * Cakes are always delivered on the day they're finished. Nobody likes stale cake.
 
-* and Sandro works from Tuesday-Saturday.
-* Custom frosting adds 2 days extra lead time. You can only frost a baked cake.
 * The shop can gift-wrap cakes in fancy boxes. Fancy boxes have a lead time of 3 days.
   Boxes can arrive while the friends are working on the cake,
-* The shop can decorate cakes with nuts.
-  Unfortunately, Sandro is allergic to nuts, so Marco does this job.
-  Decorating a cake with nuts takes 1 extra day, and has to happen after any frosting has finished.
 * The shop closes for Christmas from the 23rd of December and is open again on the 2nd of January.
   Cakes that would be complete in that period will be unable to start production until re-opening.
   Fancy boxes will continue to arrive throughout the festive period.
@@ -54,10 +49,7 @@ def test_small_cake_simple_days():
     assert two_days_later.weekday() == THURSDAY  # sanity-check
     assert (
         calculate_delivery_date(
-            cake_size="small",
-            custom_frosting=False,
             order_date=a_tuesday,
-            time="afternoon",
         )
         == two_days_later
     )
@@ -72,9 +64,7 @@ def test_big_cake_simple_days():
     assert (
         calculate_delivery_date(
             cake_size="big",
-            custom_frosting=False,
             order_date=a_tuesday,
-            time="afternoon",
         )
         == three_days_later
     )
@@ -88,8 +78,6 @@ def test_orders_in_morning_start_same_day():
     next_day = a_tuesday + timedelta(days=1)
     assert (
         calculate_delivery_date(
-            cake_size="small",
-            custom_frosting=False,
             order_date=a_tuesday,
             time="morning",
         )
@@ -106,8 +94,6 @@ def test_order_received_outside_marco_working_days():
     assert tuesday.weekday() == TUESDAY  # sanity-check
     assert (
         calculate_delivery_date(
-            cake_size="small",
-            custom_frosting=False,
             order_date=sunday,
             time="morning",
         )
@@ -117,8 +103,6 @@ def test_order_received_outside_marco_working_days():
     saturday = a_day(SATURDAY)
     assert (
         calculate_delivery_date(
-            cake_size="small",
-            custom_frosting=False,
             order_date=saturday,
             time="morning",
         )
@@ -135,8 +119,6 @@ def test_lead_time_spans_marco_nonworking_days():
     assert monday.weekday() == MONDAY  # sanity-check
     assert (
         calculate_delivery_date(
-            cake_size="small",
-            custom_frosting=False,
             order_date=friday,
             time="morning",
         )
@@ -145,10 +127,7 @@ def test_lead_time_spans_marco_nonworking_days():
     tuesday = friday + timedelta(days=4)
     assert (
         calculate_delivery_date(
-            cake_size="small",
-            custom_frosting=False,
             order_date=friday,
-            time="afternoon",
         )
         == tuesday
     )
@@ -163,10 +142,8 @@ def test_sandro_frosting_in_working_days():
     assert four_days_later.weekday() == FRIDAY  # sanity-check
     assert (
         calculate_delivery_date(
-            cake_size="small",
             custom_frosting=True,
             order_date=a_monday,
-            time="afternoon",
         )
         == four_days_later
     )
@@ -182,10 +159,8 @@ def test_sandro_frosting_on_saturday():
     assert four_days_later.weekday() == SATURDAY  # sanity-check
     assert (
         calculate_delivery_date(
-            cake_size="small",
             custom_frosting=True,
             order_date=a_tuesday,
-            time="afternoon",
         )
         == four_days_later
     )
@@ -204,10 +179,8 @@ def test_sandro_frosting_over_nonwork_days():
     assert following_tuesday.weekday() == TUESDAY  # sanity-check
     assert (
         calculate_delivery_date(
-            cake_size="small",
             custom_frosting=True,
             order_date=a_wednesday,
-            time="afternoon",
         )
         == following_tuesday
     )
@@ -233,3 +206,81 @@ def test_sandro_frosting_handover_on_sandro_nonwork_day():
         )
         == following_wednesday
     )
+
+
+def test_marco_does_nuts_simple():
+    """
+    * The shop can decorate cakes with nuts.
+    Unfortunately, Sandro is allergic to nuts, so Marco does this job.
+    Decorating a cake with nuts takes 1 extra day,
+    ->
+    """
+    a_monday = a_day(MONDAY)
+    three_days_later = a_monday + timedelta(days=3)
+    assert (
+        calculate_delivery_date(
+            order_date=a_monday,
+            nuts=True,
+        )
+        == three_days_later
+    )
+
+
+def test_marco_does_nuts_marco_holidays():
+    """
+    We can check it was marco by checking his holidays impact the d date
+    """
+    a_wednesday = a_day(WEDNESDAY)
+    next_monday = a_wednesday + timedelta(days=5)
+    assert (
+        calculate_delivery_date(
+            order_date=a_wednesday,
+            nuts=True,
+        )
+        == next_monday
+    )
+
+
+def test_nuts_happen_after_frosting():
+    """
+    Decorating a cake with nuts takes 1 extra day,
+    and has to happen after any frosting has finished.
+    """
+    a_monday = a_day(MONDAY)   #morning
+    # marco will do cake by tuesday
+    # sandro will do frosting weds + thu
+    # marco will add nuts on friday
+    five_days_later = a_monday + timedelta(days=4)
+    assert five_days_later.weekday() == FRIDAY  # sanity-check
+    assert (
+        calculate_delivery_date(
+            order_date=a_monday,
+            time="morning",
+            custom_frosting=True,
+            nuts=True,
+        )
+        == five_days_later
+    )
+
+
+def test_marco_does_nuts_sandro_handover_on_marco_nonwork_day():
+    """
+    also confirms marco is the one doing nuts
+    and that we calculate his working days right
+    """
+    a_monday = a_day(MONDAY)   # afternoon
+    # marco will do cake by weds
+    # sandro will do frosting thu + fri
+    # marco will add nuts on monday
+    next_monday = a_monday + timedelta(days=7)
+    assert next_monday.weekday() == MONDAY  # sanity-check
+    assert (
+        calculate_delivery_date(
+            order_date=a_monday,
+            time="afternoon",
+            custom_frosting=True,
+            nuts=True,
+        )
+        == next_monday
+    )
+
