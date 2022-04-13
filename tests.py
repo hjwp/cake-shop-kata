@@ -195,6 +195,9 @@ def test_sandro_frosting_over_nonwork_days():
     """
     * Custom frosting adds 2 days extra lead time. You can only frost a baked cake.
     * and Sandro works from Tuesday-Saturday.
+    eg if cake ordered on a wednesday,
+    marco will be finished on friday,
+    so sandro will need saturday and tuesday
     """
     a_wednesday = a_day(WEDNESDAY)
     following_tuesday = a_wednesday + timedelta(days=6)
@@ -208,6 +211,7 @@ def test_sandro_frosting_over_nonwork_days():
         )
         == following_tuesday
     )
+
 
 def test_sandro_frosting_handover_on_sandro_nonwork_day():
     """

@@ -43,9 +43,13 @@ def _marco_start_date(order_date: date, time: str) -> date:
 
 def _sandro_frosting_lead_time(start_date: date) -> date:
     sandro_days = _sandro_days_from(start_date)
-    next(sandro_days)
-    next(sandro_days)
-    return next(sandro_days)
+    next_sandro_day = next(sandro_days)
+    if next_sandro_day == start_date:
+        first_day = next(sandro_days)
+    else:
+        first_day = next_sandro_day
+    second_day = next(sandro_days)
+    return second_day
 
 
 def calculate_delivery_date(cake_size: str, custom_frosting: bool, order_date: date, time: str) -> date:
